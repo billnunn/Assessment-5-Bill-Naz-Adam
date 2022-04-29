@@ -29,8 +29,8 @@ Our report should be read in the following order:
 
 Our working is shown in our own directories:
 
-* Bill_Evidence/
-* Naz_Evidence/
-* Adam_Evidence/
+* Bill-Evidence/
+* Naz-Evidence/
+* Adam-Evidence/
 
 Cheers
