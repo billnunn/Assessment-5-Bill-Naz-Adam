@@ -4,7 +4,7 @@ Graph processing using Spark
 ## Group Members
 
 * Bill
-* Naz
+* Nazesh
 * Adam
 
 With ____ equity.
