@@ -18,11 +18,12 @@ All report content is in the directory:
 Our report should be read in the following order:
 
 * 01-Introduction
-* 02-Graph Construction
+* 02-Graph Derivation
 * 03-Getting GraphFrames Working
-* 04-Graph Analysis (This is the meaty section can be split)
-* 05-Pregel vs GraphFrames
-* 06-Conclusion
+* 04-Graph Analysis (This is a very meaty section and may be split)
+* 05-Computational Performance
+* 06-Pregel vs GraphFrames
+* 07-Conclusion
 
 ## Requirements
 
