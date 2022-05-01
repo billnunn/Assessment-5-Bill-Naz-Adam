@@ -13,7 +13,7 @@ With ____ equity.
 
 All report content is in the directory:
 
-* /Report
+* [Report](/Report)
 
 Our report should be read in the following order:
 
