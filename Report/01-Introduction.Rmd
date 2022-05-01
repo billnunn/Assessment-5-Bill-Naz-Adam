@@ -1,0 +1,12 @@
+---
+title: "01-Introduction"
+author: "Bill"
+date: "01/05/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In this project we explore and discuss Apache-Spark's GraphFrames package, giving careful consideration to the massive parallelisation. We derive a graph from the email data of CMU's synthetic [insider threat dataset](https://kilthub.cmu.edu/articles/dataset/Insider_Threat_Test_Dataset/12841247/1) in **Section-02** and then in **Section-04** we apply multiple algorithms to this graphframe, with the overarching aim of deriving an 'insider likelihood' score for each employee given a set of employees to be made redundant. The computational performance of the **Section-04** algorithms run locally in Apache-Spark is discussed and compared to 'less-parallel' implementations of the same algorithms in **Section-05**, and we lastly touch upon the manner in which GraphFrames extends the 'Pregel' computational paradigm in **Section-06**.

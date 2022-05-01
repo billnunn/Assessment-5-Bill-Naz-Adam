@@ -1,0 +1,111 @@
+---
+title: "02-Graph Derivation"
+author: "Bill"
+date: "01/05/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(tidyr)
+library(data.table)
+library(igraph)
+library(Rtsne)
+```
+
+In this section we derive a graph from CMU's [insider threat data set](https://kilthub.cmu.edu/articles/dataset/Insider_Threat_Test_Dataset/12841247/1) which will be used as the example graph of all our coming analysis. 
+
+### 2.1 Dataset Description
+
+Our data is a well recognised synthetic data set which models a 1000 employee company, with multiple instances of insiders acting maliciously. We decided to use version r3.1 and this includes the following data:
+
+* An LDAP for the beginning of each month, with psychometric data on each employee.
+* Employee log-ons and removable device usage.
+* The URLs employees visit and which files employees copy to removable devices.
+* Every email sent using a company email address.
+
+The data has an accompanying paper which outlines the method in which it was generated [1]. The fastest way to get a feel for the generation is to view the interdependence of the variables (some of which are hidden like 'relationships', 'job satisfaction', and 'topic affinities').
+
+```{r, echo=FALSE, out.width="50%", fig.align="center"}
+knitr::include_graphics('/Users/billnunn/Desktop/pic.jpg')
+```
+
+We want to try and understand the employee 'relationships' within the company, and since the 'communications' is dependent upon the 'relationships' constructing a graph from the email data will help this aim. We note that the data required for our construction is available to real companies, and that the underlying assumption that emails reflect relationships seems like it would also hold in the real world.
+
+### 2.2 Graph Construction
+
+The graph we construct is the directed graph where each node is an email address and the weight of each directed edge is equal to the number of emails sent from one address to another in the first month when nobody has been fired. Let's go ahead and make this graph. Let's read in the data.
+
+```{r}
+tofrom <- fread("/Users/billnunn/Desktop/r3.1/email.csv", nrows = 129559,
+              select = c(3:4))
+head(tofrom)
+```
+
+We see in the second row here that emails can contain multiple recipients, our decision is to regard such an email as a seperate email to each recipient. Let's carry out the required transformation on the dataframe.
+
+```{r}
+tofrom <- separate_rows(tofrom, to, sep = ";")
+head(tofrom)
+```
+
+Looks good. We now arrive at the edge list, and the edge weight, by listing the unique rows and counting the number of times each row appears in `tofrom`.
+
+```{r}
+edges <- tofrom %>% count(to, from)
+head(edges)
+```
+
+The resulting edge list is saved as a csv, and we've put it in the **Data** folder of our repository Dan if you need it for the analyses in the later sections.
+
+### 2.3 Sanity Embedding
+
+We've spent too much time with Patrick, and so before proceeding with the main thread of our report we would like to embed our graph and demonstrate that it does capture some of the relationship information. Hopefully this will convince one that we're not just applying massively parallel algorithms to a graph totally devoid of meaning!
+
+To make our embedding as quick and dirty as possible we ignore the edge weights and the fact that our edges are directed. We do this by abusing `igraphs` `graph_from_data_frame` function.
+
+```{r}
+edges <- edges[,1:2]
+G <- graph_from_data_frame(edges, directed = FALSE, 
+                                 vertices = NULL)
+```
+
+We now carry out a standard spectral embedding, followed by dimension reduction and plotting.
+
+```{r}
+G_embed <- embed_laplacian_matrix(G, 10, options = list(maxiter=2000))
+set.seed(43)
+G_tsne <- Rtsne(G_embed$X, dims = 2, initial_dims = 10)
+plot(G_tsne$Y, pch=19, cex=0.3, xlab = "First Component", ylab = "Second Component")
+```
+
+It looks like there's structure there, let's retrieve each employees department and colour our points accordingly.
+
+```{r}
+LDAP1 <- fread("/Users/billnunn/Desktop/r3.1/LDAP/2009-12.csv")
+
+plot_cols <- c()
+
+for(email in V(G)$name){
+  if(email %in% LDAP1$email){
+    plot_cols <- c(plot_cols, 
+                   LDAP1$department[match(email, LDAP1$email)])
+  }
+  else{
+    plot_cols <- c(plot_cols, "External")
+  }
+}
+
+plot_cols <- as.numeric(as.factor(plot_cols))
+```
+
+```{r}
+plot(G_tsne$Y, pch=19, cex=0.3, xlab = "First Component", ylab = "Second Component", col=plot_cols)
+```
+
+We get excellent separation between members of the company (coloured points) and the external email addresses in grey. We also see a few small clusters of pretty much a single colour which could be teams within a single department. We therefore think that our graph may have captured some of the social structure of the company, and proceed hopefully!
+
+### Section Sources
+
+[1] J. Glasser and B. Lindauer, "Bridging the Gap: A Pragmatic Approach to Generating Insider Threat Data," 2013 IEEE Security and Privacy Workshops, 2013, pp. 98-104, doi: 10.1109/SPW.2013.37.
