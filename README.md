@@ -32,8 +32,8 @@ Section 03 of the report is provided to help get Spark's GraphFrames package wor
 
 Our working is shown in our own directories:
 
-* /Bill-Evidence
-* /Naz-Evidence
-* /Adam-Evidence
+* [Bill-Evidence](/Bill-Evidence)
+* [Naz-Evidence](/Naz-Evidence)
+* [Adam-Evidence](/Adam-Evidence)
 
 Cheers
