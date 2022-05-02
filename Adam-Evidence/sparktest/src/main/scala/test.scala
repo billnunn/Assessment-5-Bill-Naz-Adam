@@ -1,15 +1,8 @@
-import breeze.linalg.Vector.castFunc
-import breeze.linalg.{sum}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql._
-import org.apache.spark.sql.catalyst.dsl
-import org.apache.spark.sql.catalyst.dsl.expressions.{DslExpression, StringToAttributeConversionHelper}
-import org.apache.spark.sql.expressions.scalalang.typed
-import org.apache.spark.sql.functions.{array, col, count, explode, lit}
-import org.apache.spark.sql.types.{StringType, StructField, StructType}
+import org.apache.spark.sql.functions.{ col, lit}
 import org.graphframes.GraphFrame.{DST, ID, SRC}
 import org.graphframes.lib.AggregateMessages
-import org.graphframes.lib.Pregel.msg.isin
 import org.graphframes.GraphFrame
 
 import scala.collection.JavaConversions.collectionAsScalaIterable
@@ -23,18 +16,18 @@ object test {
     val vo = outdeg.where(outdeg.col("id") === row.getString(0))
     val s = vs.first().getInt(1) / (vi.first().getInt(1) * (vo.first().getInt(1)))
     s
-  }*/
+  }
   def calcoutdeg(g: GraphFrame) : DataFrame ={
     g.edges.groupBy(g.edges("src").as(ID)).agg(functions.sum("n").cast("int").as("outDegree"))
   }
   def calcindeg(g: GraphFrame): DataFrame= {
     g.edges.groupBy(g.edges(DST).as(ID)).agg(functions.sum("n").cast("int").as("inDegree"))
-  }
+  }*/
 
 
   def main(args: Array[String]): Unit = {
-
-    import org.apache.spark.{SparkConf, SparkContext, sql}
+    timer.main()
+    /*import org.apache.spark.{SparkConf, SparkContext, sql}
     import scala.math._
     // tried to manipulate graphx but easier to expand edges
     Logger.getLogger("org").setLevel(Level.ERROR)
@@ -52,17 +45,14 @@ object test {
     val v3 = v1.union(v2)
 
     val g=GraphFrame(v3,e)
-    val t1_0 = System.nanoTime
+
     val cc = g.connectedComponents.run()
-    val duration_0 = (System.nanoTime - t1_0) / 1e9d
-    println(duration_0)
     cc.describe("component").show()
-    //cc.write.csv("../../data/connected.csv")
+    cc.write.csv("../../data/connected.csv")
 
     val indeg = g.inDegrees
     val outdeg = g.outDegrees
 
-    val t1_1 = System.nanoTime
     val e1 = e.join(v3, e("src") === v3("id"))
     val e2 = e1.join(indeg, e1("dst") === indeg("id")).select(e1("*"),indeg("inDegree"))
     val e3 = e2.join(outdeg, e2("src") === outdeg("id")).select(e2("*"),outdeg("outDegree"))
@@ -98,14 +88,11 @@ object test {
     val rec_1 = v4_1.select("id").map(x => x.getString(0)).collectAsList().toSeq
     val v6_1 = v7.filter(!v7("id").isin(rec_1: _*)).withColumn("totalweight", v7.col("neg_sentiment")).select("id","totalweight")
     val v7_1 = v6_1.union(v5_1).withColumnRenamed("totalweight","neg_sentiment")
-    v7_1.show()
-    val duration_1 = (System.nanoTime - t1_1) / 1e9d
-    println(duration_1)
-    //v7_1.describe("neg_sentiment")
-    //v7_1.write.csv("../../data/sent1.csv")
+    v7_1.describe("neg_sentiment")
+    v7_1.write.csv("../../data/sent1.csv")
 
 //////////////////////////// 2.1
-    val t1_2 = System.nanoTime
+
     val pr = g.pageRank.maxIter(5).run()
     val e4_1_1 = e3.join(pr.edges,(e3("src") === pr.edges("src")) && (e3("dst") === pr.edges("dst"))).select(e3("*"),pr.edges("weight"))
     val e5_1_1 = e4_1_1.map(x => (x.getString(0),x.getString(1),1.0 * x.getInt(3) * x.getDouble(6))).toDF("src", "dst", "weight")
@@ -139,12 +126,9 @@ object test {
     val rec_1_2 = v4_1_2.select("id").map(x => x.getString(0)).collectAsList().toSeq
     val v6_1_2 = v7_1_1.filter(!v7_1_1("id").isin(rec_1_2: _*)).withColumn("totalweight", v7_1_1.col("neg_sentiment")).select("id","totalweight")
     val v7_1_2 = v6_1_2.union(v5_1_2).withColumnRenamed("totalweight","neg_sentiment")
-    v7_1_2.show()
-    val duration_2 = (System.nanoTime - t1_2) / 1e9d
-    println(duration_2)
-    //v7_1_2.describe("neg_sentiment")
-    //v7_1_2.write.csv("../../data/sent2.csv")
-
+    v7_1_2.describe("neg_sentiment")
+    v7_1_2.write.csv("../../data/sent2.csv")
+*/
   }
 
 
