@@ -3,24 +3,26 @@ library(tidyr)
 library(data.table)
 library(stringr)
 
-LDAP1 <- fread("/Users/billnunn/Desktop/r3.1/LDAP/2009-12.csv")
-LDAP2 <- fread("/Users/billnunn/Desktop/r3.1/LDAP/2010-01.csv")
-LDAP3 <- fread("/Users/billnunn/Desktop/r3.1/LDAP/2010-02.csv")
+LDAP1 <- fread("../data/r3.1/LDAP/2009-12.csv")
+LDAP2 <- fread("../data/r3.1/LDAP/2010-01.csv")
+LDAP3 <- fread("../data/r3.1/LDAP/2010-02.csv")
 
 # We see that no employees were fired in the first month and 7
 # were fired in the second month:
-setdiff(LDAP1$user_id, LDAP2$user_id)
-fired <- setdiff(LDAP2$user_id, LDAP3$user_id)
+setdiff(LDAP1$email, LDAP2$email)
+fired <- setdiff(LDAP2$email, LDAP3$email)
+
+write.csv(fired, "../data/fired1.csv", row.names = FALSE)
 
 # We now check when each of these employees last logged on.
-logons <- read.csv("/Users/billnunn/Desktop/r3.1/logon.csv")
+#logons <- read.csv("../data/r3.1/logon.csv")
 
-for(id in fired){
-  tail(logons[logons$user == id,]) %>% print()
-}
-rm(id)
+#for(id in fired){
+#  tail(logons[logons$user == id,]) %>% print()
+#}
+#rm(id)
 
-rm(LDAP2, LDAP3, logons)
+#rm(LDAP2, LDAP3, logons)
 
 # Great, all these guy's last days were indeed in the second month.
 # We therefore have one month of email data where everyone's present.
@@ -28,7 +30,7 @@ rm(LDAP2, LDAP3, logons)
 # We read in this first month of email data, we use `fread` to avoid
 # reading in the (nonsense) `content` column.
 
-emails <- fread("/Users/billnunn/Desktop/r3.1/email.csv", nrows = 129559,
+emails <- fread("../data/r3.1/email.csv", nrows = 129559,
               select = c(1:6))
 
 # For now we'll just consider the `to` and `from` columns of our data.
@@ -59,7 +61,7 @@ head(tofrom)
 edges <- tofrom %>% count(to, from)
 head(edges)
 
-write.csv(edges, "/Users/billnunn/Desktop/edges.csv", row.names = FALSE)
+write.csv(tofrom, "../data/edges1.csv", row.names = FALSE)
 
-test <- read.csv("/Users/billnunn/Desktop/edges.csv")
-head(test)
+#test <- read.csv("/Users/billnunn/Desktop/edges.csv")
+#head(test)
