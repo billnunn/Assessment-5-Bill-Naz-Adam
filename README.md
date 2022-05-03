@@ -19,7 +19,7 @@ Our report should be read in the following order:
 
 * 01-Introduction
 * 02-Graph Derivation
-* 03-Getting GraphFrames Working
+* 03-Scala Processing
 * 04-Graph Analysis
 * 05-Computational Performance
 * 06-Pregel vs GraphFrames
@@ -27,7 +27,7 @@ Our report should be read in the following order:
 
 ## Requirements
 
-Section 03 of the report is provided to help get Spark's GraphFrames package working in Jupyter. 
+Section 03 of the report requires the installation of IntelliJ IDEA IDE, where you can import the folder as a project. I am sure there is a more optimal way to run this, however this is most likely to work. 
 
 ## Evidence
 
