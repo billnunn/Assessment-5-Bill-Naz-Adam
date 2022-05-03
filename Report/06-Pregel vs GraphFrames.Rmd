@@ -1,0 +1,90 @@
+---
+title: "06-Pregel vs GraphFrames"
+author: "Bill"
+date: "01/05/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(igraph)
+```
+
+We carried out experiments with Erdos-Renyi random graphs in section  **Section 6** to try to derive the time complexity of the built-in 'connected component' and 'page rank' algorithms in R and graphframes. To build upon our experiments this breif section will provide some context for the underlying optimisations in the graphframes connected component algorithm. Interestingly, it turns out that the optimisations used for the graphframes connected component algorithm are only realisable using the GraphFrame data structure [1], and in this sense the graphframes package extends the Pregel (equivalently GraphX) paradigm.
+
+### 6.1 Pregel Paradigm
+
+Pregel was introduced by Google for large scale graph processing, at the time of it's introduction the MapReduce framework was dominant way to process big data, and this framework was ineffective for many graph processing tasks. To solve this problem Pregel introduced the "think like a vertex" view of computation on graphs. A 'Pregel style' algorithm takes the following form:
+
+1. Each vertex of the underlying graph is assigned a starting state.
+2. Each vertex passes and receives messages from it's neighbours. This is called the 'superstep' in Pregel lingo.
+3. Each vertex collates the messages it received and updates it's state.
+4. Stages 2 and 4 are repeated until some pre-specified halting condition is reached.
+
+To clarify this form and further our discussion we now consider the Pregel algorithm for computing the connected components of a graph:
+
+1. Each vertex of the underlying graph is assigned a label from a totally ordered set.
+2. Each vertex passes it's internal label to it's neighbouring vertices.
+3. Each vertex updates it's state to the minimum of it’s previous label and the labels received from it's neighbours.
+4. Stages 2 and 4 are repeated until no vertex changes its label.
+
+When this algorithm halts each vertex belonging to a distinct connected component will have the same (smallest and unique to the component) label. It is worth noting that this algorithm is the built-in connected components algorithm for Spark's GraphX (based on Pregel paradigm, built with RDDs) package. Unfortunately, this algorithm can take a long time to finish running on graphs with a large diameter. Consider it acting on the ring graph of 10 vertices:
+
+```{r, echo=FALSE}
+g <- make_ring(10)
+g$layout <- layout_in_circle
+plot(g)
+```
+
+In order to halt on this graph precisely five supersteps must be completed: the 1 vertex has to spread its label to the vertex directly opposite. We easily see from here that $O(N)$ supersteps are required to halt the component algorithm for the ring on $N$ vertices. The built-in connected component algorithm of graphframes avoids this problem.
+
+### 6.2 Large-Star Small-Star Algorithm
+
+This section explains the underlying algorithm of graphframe's connected component function. We found this out quite accidentally when Bill watched a talk [1] by one of the co-authors of the graphframes package, according to him the 'Large-Star Small-Star' algorithm [2] is used. In section **6.3** we then touch upon how this algorithm is actually implemented.
+
+Once again we assume each vertex has a label belonging to a totally ordered set. A large star operation acts at each vertex v and joins all neighbours of v which have a larger label to the vertex with the minimum label of v and its neighbourhood. With a small star operation being defined near identically, but all neighbours of v which have a smaller or equal label are joined to the minimum. The picture below helps to illustrate this:
+
+```{r, echo=FALSE, fig.align="center"}
+knitr::include_graphics('/Users/billnunn/Desktop/diag.jpg')
+```
+
+The following pseudo-code is nicked from paper [2] directly, it describes the large-star small-star algorithm, where the connected components can be very easily found from the final state:
+
+```{r, echo=FALSE, out.width="50%", fig.align="center"}
+knitr::include_graphics('/Users/billnunn/Desktop/bsss.jpg')
+```
+
+Where $l_v$ denotes the label of vertex $v$.
+
+It can be seen that both the small and large star steps fit very neatly into the MapReduce framework, where the pseudo-code again from [2] is given for large star:
+
+```{r, echo=FALSE, out.width="50%", fig.align="center"}
+knitr::include_graphics('/Users/billnunn/Desktop/mrls.jpg')
+```
+
+Where $\Gamma^+(v)$ denotes the neighbourhood of vertex $v$ union $v$ itself.
+
+It's worth noting here that large star doesn't fit into the 'Pregel' paradigm, the edges have been map reduced instead of vertex centric message passing. Quite surprisingly, both the small star and the large star operations maintain the connectivity of components, as well as (non-strictly) decreasing the number of edges after each application. From here it's proven that convergence occurs within $O(log^2(N))$ applications of large/small stars! With the final convergence of large-star small-star on our ring graph on 10 vertices given by:
+
+```{r, echo=FALSE}
+g <- make_star(10)
+plot(g)
+```
+
+### 6.3 Implementation in Graphframes
+
+We struggled to write this section, going quite deep into the Spark DataFrame guide [3] to try and understand how large star could be efficiently implemented, we didn't have much luck given the time pressure. The rundown is this, somehow the GraphFrame (bunch of Spark DataFrames) data structure can have the large star small star efficiently implemented, and the result is a connected components algorithm with better time complexity acting on large diameter graphs than the natural Pregel (or GraphX) implementation.
+
+### Section Sources
+
+[1] Spark Summit Europe 2017 - https://www.youtube.com/watch?v=NmbKst7ny5Q
+
+[2] SOCC '14: Proceedings of the ACM Symposium on Cloud Computing, 
+November 2014, Pages 1–13 https://doi.org/10.1145/2670979.2670997
+
+[3] https://spark.apache.org/docs/latest/sql-programming-guide.html 
+
+
+
+
+
