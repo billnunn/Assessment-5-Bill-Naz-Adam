@@ -20,7 +20,7 @@ Our report should be read in the following order:
 * 01-Introduction
 * 02-Graph Derivation
 * 03-Getting GraphFrames Working
-* 04-Graph Analysis (This is a very meaty section and may be split)
+* 04-Graph Analysis
 * 05-Computational Performance
 * 06-Pregel vs GraphFrames
 * 07-Conclusion
