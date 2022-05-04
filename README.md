@@ -7,7 +7,7 @@ Graph processing using Spark.
 * Nazesh
 * Adam
 
-With ____ equity.
+With 38:31:31 equity for Adam:Bill:Nazesh.
 
 ## Reading Order
 
