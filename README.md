@@ -21,10 +21,11 @@ Our report should be read in the following order:
 * 02-Graph Derivation
 * 03-Scala Processing
 * 04-Graph Analysis
-* 05-Computational Performance
+* 05-Computational Performance GraphFrames vs igraph
 * 06-Pregel vs GraphFrames
 * 07-Conclusion
-
+* 08-Appendix
+ 
 ## Requirements
 
 Section 03 of the report requires the installation of IntelliJ IDEA IDE, where you can import the folder as a project. I am sure there is a more optimal way to run this, however this is most likely to work. The important files are found in src/main/scala. test.scala, is the main file that runs the code on the dataset. timer.scala is the code for the timing test, however to run this you are required to comment out the majority of the code in test.main() and uncomment the first line (there is a comment to highlight this line). 
